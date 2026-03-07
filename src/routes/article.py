@@ -8,7 +8,7 @@ from src.schemas.article import ArticleCreate, ArticleListResponse, ArticleRespo
 from src.schemas.response import ApiResponse, Meta
 from src.usecases.article import ArticleUseCases
 
-router = APIRouter(prefix="/api/articles")
+router = APIRouter(prefix="/api/articles", tags=["Articles"])
 
 
 @router.post("", response_model=ApiResponse[ArticleResponse], status_code=201)
