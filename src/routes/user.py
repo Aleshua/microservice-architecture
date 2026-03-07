@@ -8,7 +8,7 @@ from src.schemas.response import ApiResponse
 from src.schemas.user import AuthResponse, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate
 from src.usecases.user import UserUseCases
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", tags=["Users"])
 
 
 @router.post("/users", response_model=ApiResponse[AuthResponse], status_code=201)
