@@ -21,15 +21,11 @@ async def register(
 ):
     try:
         user, token = await usecases.register(data)
+        user_dict = UserResponse.model_validate(user).model_dump()
+        user_dict["token"] = token
         return ApiResponse(
             message="user registered successfully",
-            data=AuthResponse(
-                email=user.email,
-                username=user.username,
-                bio=user.bio,
-                image_url=user.image_url,
-                token=token,
-            ),
+            data=AuthResponse(**user_dict),
         )
     except EmailOrUsernameTakenError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.detail)
