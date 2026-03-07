@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.dependencies.usecases import get_user_usecases
@@ -11,7 +9,6 @@ from src.schemas.user import AuthResponse, TokenResponse, UserCreate, UserLogin,
 from src.usecases.user import UserUseCases
 
 router = APIRouter(prefix="/api")
-logger = logging.getLogger(__name__)
 
 
 @router.post("/users", response_model=ApiResponse[AuthResponse], status_code=201)
@@ -21,20 +18,14 @@ async def register(
 ):
     try:
         user, token = await usecases.register(data)
-        user_dict = UserResponse.model_validate(user).model_dump()
-        user_dict["token"] = token
-        return ApiResponse(
-            message="user registered successfully",
-            data=AuthResponse(**user_dict),
-        )
     except EmailOrUsernameTakenError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.detail)
-    except Exception:
-        logger.exception("failed to register user")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to register user",
-        )
+    user_dict = UserResponse.model_validate(user).model_dump()
+    user_dict["token"] = token
+    return ApiResponse(
+        message="user registered successfully",
+        data=AuthResponse(**user_dict),
+    )
 
 
 @router.post("/users/login", response_model=ApiResponse[TokenResponse])
@@ -44,35 +35,22 @@ async def login(
 ):
     try:
         token = await usecases.login(data)
-        return ApiResponse(
-            message="login successful",
-            data=TokenResponse(token=token),
-        )
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=e.detail)
-    except Exception:
-        logger.exception("failed to login user")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to login",
-        )
+    return ApiResponse(
+        message="login successful",
+        data=TokenResponse(token=token),
+    )
 
 
 @router.get("/user", response_model=ApiResponse[UserResponse])
 async def get_current(
     user: User = Depends(get_current_user),
 ):
-    try:
-        return ApiResponse(
-            message="user profile",
-            data=UserResponse.model_validate(user),
-        )
-    except Exception:
-        logger.exception("failed to get user profile")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to get user profile",
-        )
+    return ApiResponse(
+        message="user profile",
+        data=UserResponse.model_validate(user),
+    )
 
 
 @router.put("/user", response_model=ApiResponse[UserResponse])
@@ -83,15 +61,9 @@ async def update(
 ):
     try:
         user = await usecases.update(user, data)
-        return ApiResponse(
-            message="user updated successfully",
-            data=UserResponse.model_validate(user),
-        )
     except EmailOrUsernameTakenError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.detail)
-    except Exception:
-        logger.exception("failed to update user")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to update user",
-        )
+    return ApiResponse(
+        message="user updated successfully",
+        data=UserResponse.model_validate(user),
+    )

@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.dependencies.usecases import get_comment_usecases
@@ -12,7 +10,6 @@ from src.schemas.response import ApiResponse
 from src.usecases.comment import CommentUseCases
 
 router = APIRouter(prefix="/api/articles")
-logger = logging.getLogger(__name__)
 
 
 @router.post("/{slug}/comments", response_model=ApiResponse[CommentResponse], status_code=201)
@@ -24,18 +21,12 @@ async def add_comment(
 ):
     try:
         comment = await usecases.add_comment(slug, data.body, user)
-        return ApiResponse(
-            message="comment created successfully",
-            data=CommentResponse.model_validate(comment),
-        )
     except ArticleNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
-    except Exception:
-        logger.exception("failed to create comment")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to create comment",
-        )
+    return ApiResponse(
+        message="comment created successfully",
+        data=CommentResponse.model_validate(comment),
+    )
 
 
 @router.get("/{slug}/comments", response_model=ApiResponse[CommentListResponse])
@@ -45,20 +36,14 @@ async def get_comments(
 ):
     try:
         comments = await usecases.get_comments(slug)
-        return ApiResponse(
-            message="comments list",
-            data=CommentListResponse(
-                comments=[CommentResponse.model_validate(c) for c in comments],
-            ),
-        )
     except ArticleNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
-    except Exception:
-        logger.exception("failed to get comments")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to get comments",
-        )
+    return ApiResponse(
+        message="comments list",
+        data=CommentListResponse(
+            comments=[CommentResponse.model_validate(c) for c in comments],
+        ),
+    )
 
 
 @router.delete("/{slug}/comments/{comment_id}", status_code=204)
@@ -76,9 +61,3 @@ async def delete_comment(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
     except CommentForbiddenError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.detail)
-    except Exception:
-        logger.exception("failed to delete comment")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="failed to delete comment",
-        )
