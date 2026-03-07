@@ -9,7 +9,7 @@ from src.schemas.comment import CommentCreate, CommentListResponse, CommentRespo
 from src.schemas.response import ApiResponse
 from src.usecases.comment import CommentUseCases
 
-router = APIRouter(prefix="/api/articles")
+router = APIRouter(prefix="/api/articles", tags=["Comments"])
 
 
 @router.post("/{slug}/comments", response_model=ApiResponse[CommentResponse], status_code=201)
