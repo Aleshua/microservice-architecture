@@ -21,4 +21,17 @@ pip install -r requirements.txt
 uvicorn src.main:app --reload
 ```
 
+## Migrations
+
+```bash
+# apply all migrations
+docker compose --profile app exec app alembic upgrade head
+
+# rollback last migration
+docker compose --profile app exec app alembic downgrade -1
+
+# auto-generate new migration
+docker compose --profile app exec app alembic revision --autogenerate -m "migration_name"
+```
+
 Health check: `GET /api/health` → `{"status": "ok"}`
