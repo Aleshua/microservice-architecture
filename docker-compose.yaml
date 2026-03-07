@@ -21,6 +21,10 @@ services:
     profiles: ["app"]
     ports:
       - "${APP_PORT}:8000"
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
     env_file:
       - .env
     depends_on:
