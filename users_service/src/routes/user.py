@@ -8,10 +8,10 @@ from src.schemas.response import ApiResponse
 from src.schemas.user import AuthResponse, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate
 from src.usecases.user import UserUseCases
 
-router = APIRouter(prefix="/api", tags=["Users"])
+router = APIRouter(prefix="/api/users", tags=["Users"])
 
 
-@router.post("/users", response_model=ApiResponse[AuthResponse], status_code=201)
+@router.post("", response_model=ApiResponse[AuthResponse], status_code=201)
 async def register(
     data: UserCreate,
     usecases: UserUseCases = Depends(get_user_usecases),
@@ -28,7 +28,7 @@ async def register(
     )
 
 
-@router.post("/users/login", response_model=ApiResponse[TokenResponse])
+@router.post("/login", response_model=ApiResponse[TokenResponse])
 async def login(
     data: UserLogin,
     usecases: UserUseCases = Depends(get_user_usecases),
@@ -43,7 +43,7 @@ async def login(
     )
 
 
-@router.get("/user", response_model=ApiResponse[UserResponse])
+@router.get("/me", response_model=ApiResponse[UserResponse])
 async def get_current(
     user: User = Depends(get_current_user),
 ):
@@ -53,7 +53,7 @@ async def get_current(
     )
 
 
-@router.put("/user", response_model=ApiResponse[UserResponse])
+@router.put("/me", response_model=ApiResponse[UserResponse])
 async def update(
     data: UserUpdate,
     user: User = Depends(get_current_user),
