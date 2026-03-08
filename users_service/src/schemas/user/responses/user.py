@@ -8,6 +8,7 @@ class UserResponse(BaseModel):
     username: str
     bio: str | None = None
     image_url: str | None = None
+    subscription_key: str | None = None
     created_at: datetime
     updated_at: datetime
 
