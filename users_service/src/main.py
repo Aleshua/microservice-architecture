@@ -8,6 +8,8 @@ app = FastAPI(
     title="Users Service API",
     description="Microservice for user management and authentication",
     version="1.0.0",
+    docs_url="/api/users/docs",
+    openapi_url="/api/users/openapi.json",
 )
 
 app.add_middleware(
