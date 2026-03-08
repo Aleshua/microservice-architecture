@@ -9,6 +9,8 @@ app = FastAPI(
     title="Backend API",
     description="Microservice for articles and comments",
     version="1.0.0",
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
 )
 
 app.add_middleware(
