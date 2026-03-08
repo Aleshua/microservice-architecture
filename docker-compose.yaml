@@ -100,8 +100,11 @@ services:
     environment:
       REDIS_URL: ${REDIS_URL}
       USERS_DATABASE_URL: postgresql://${USERS_POSTGRES_USER}:${USERS_POSTGRES_PASSWORD}@users-db:5432/${USERS_POSTGRES_DB}
+      PUSH_URL: http://push-notificator:8000/api/v1/notify
     depends_on:
       redis:
+        condition: service_healthy
+      users-db:
         condition: service_healthy
       push-notificator:
         condition: service_started
