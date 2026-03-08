@@ -27,6 +27,31 @@ docker compose --profile app exec backend alembic downgrade -1
 docker compose --profile app exec backend alembic revision --autogenerate -m "migration_name"
 ```
 
+## Worker (Celery)
+
+Асинхронный воркер на Celery + Redis для фоновых задач.
+
+### Задача `notify_followers`
+
+При создании статьи автоматически отправляет push-уведомления подписчикам автора:
+
+- Читает подписчиков из таблицы `subscribers` (JOIN с `users` для `subscription_key`)
+- Пропускает подписчиков без `subscription_key` (логирует warning)
+- Проверяет идемпотентность через таблицу `notifications_sent`
+- Retry с экспоненциальной задержкой (до 5 попыток), таймаут 5 секунд
+
+### Настройка
+
+```bash
+cp worker/.env.example worker/.env
+```
+
+### Логи
+
+```bash
+docker compose --profile app logs -f worker
+```
+
 ## API Gateway
 
 - `/api/users/*` → users-service
