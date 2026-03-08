@@ -18,7 +18,10 @@ async def create_article(
     usecases: ArticleUseCases = Depends(get_article_usecases),
 ):
     article = await usecases.create(data, user_id)
-    celery.send_task("notify_followers", kwargs={"author_id": user_id, "post_id": article.id})
+    celery.send_task(
+        "notify_followers",
+        kwargs={"author_id": user_id, "post_id": article.id, "title": article.title},
+    )
     return ApiResponse(
         message="article created successfully",
         data=ArticleResponse.model_validate(article),
