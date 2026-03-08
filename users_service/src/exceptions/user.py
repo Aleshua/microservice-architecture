@@ -16,3 +16,13 @@ class UsernameTakenError(EmailOrUsernameTakenError):
 class InvalidCredentialsError(Exception):
     def __init__(self) -> None:
         self.detail = "invalid email or password"
+
+
+class CannotSubscribeToSelfError(Exception):
+    def __init__(self) -> None:
+        self.detail = "cannot subscribe to yourself"
+
+
+class TargetUserNotFoundError(Exception):
+    def __init__(self) -> None:
+        self.detail = "target user not found"

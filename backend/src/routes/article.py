@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from src.celery_app import celery
 from src.dependencies.usecases import get_article_usecases
 from src.exceptions.article import ArticleForbiddenError, ArticleNotFoundError
 from src.middleware.auth import get_authenticated_user_id
@@ -17,6 +18,10 @@ async def create_article(
     usecases: ArticleUseCases = Depends(get_article_usecases),
 ):
     article = await usecases.create(data, user_id)
+    celery.send_task(
+        "notify_followers",
+        kwargs={"author_id": user_id, "post_id": article.id, "title": article.title},
+    )
     return ApiResponse(
         message="article created successfully",
         data=ArticleResponse.model_validate(article),

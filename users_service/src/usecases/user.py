@@ -6,7 +6,7 @@ from src.exceptions.user import (
 )
 from src.models.user import User
 from src.repositories.user import UserRepository
-from src.schemas.user import UserCreate, UserLogin, UserUpdate
+from src.schemas.user import SubscriptionKeyUpdate, UserCreate, UserLogin, UserUpdate
 from src.services.password import PasswordService
 from src.services.token import TokenService
 
@@ -67,4 +67,9 @@ class UserUseCases:
 
         user = await self._repo.update(user)
 
+        return user
+
+    async def update_subscription_key(self, user: User, data: SubscriptionKeyUpdate) -> User:
+        user.subscription_key = data.subscription_key
+        user = await self._repo.update(user)
         return user

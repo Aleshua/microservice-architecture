@@ -70,6 +70,8 @@ services:
     depends_on:
       backend-db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request, os; urllib.request.urlopen(os.environ['APP_URL'] + '/api/health')"]
       interval: 10s
@@ -78,6 +80,43 @@ services:
     networks:
       - backend-net
       - gateway-net
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["dev", "app"]
+    ports:
+      - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend-net
+
+  worker:
+    build: ./worker
+    profiles: ["app"]
+    env_file:
+      - ./worker/.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      users-db:
+        condition: service_healthy
+      push-notificator:
+        condition: service_started
+    networks:
+      - backend-net
+      - users-net
+
+  push-notificator:
+    image: ghcr.io/ayusavin/push-notification-playground:1.0.0
+    profiles: ["app"]
+    ports:
+      - "${PUSH_PORT}:8000"
+    networks:
+      - backend-net
 
   api-gateway:
     image: nginx:alpine

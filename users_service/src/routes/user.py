@@ -1,11 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from src.dependencies.usecases import get_user_usecases
-from src.exceptions.user import EmailOrUsernameTakenError, InvalidCredentialsError
+from src.dependencies.usecases import get_subscription_usecases, get_user_usecases
+from src.exceptions.user import (
+    CannotSubscribeToSelfError,
+    EmailOrUsernameTakenError,
+    InvalidCredentialsError,
+    TargetUserNotFoundError,
+)
 from src.middleware.user import get_current_user
 from src.models.user import User
 from src.schemas.response import ApiResponse
-from src.schemas.user import AuthResponse, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate
+from src.schemas.user import AuthResponse, SubscribeRequest, SubscriptionKeyUpdate, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate
+from src.usecases.subscription import SubscriptionUseCases
 from src.usecases.user import UserUseCases
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
@@ -53,6 +59,19 @@ async def get_current(
     )
 
 
+@router.put("/me/subscription-key", response_model=ApiResponse[UserResponse])
+async def update_subscription_key(
+    data: SubscriptionKeyUpdate,
+    user: User = Depends(get_current_user),
+    usecases: UserUseCases = Depends(get_user_usecases),
+):
+    user = await usecases.update_subscription_key(user, data)
+    return ApiResponse(
+        message="subscription key updated successfully",
+        data=UserResponse.model_validate(user),
+    )
+
+
 @router.put("/me", response_model=ApiResponse[UserResponse])
 async def update(
     data: UserUpdate,
@@ -67,3 +86,19 @@ async def update(
         message="user updated successfully",
         data=UserResponse.model_validate(user),
     )
+
+
+@router.post("/subscribe", status_code=status.HTTP_204_NO_CONTENT)
+async def subscribe(
+    data: SubscribeRequest,
+    user: User = Depends(get_current_user),
+    usecases: SubscriptionUseCases = Depends(get_subscription_usecases),
+):
+    try:
+        await usecases.subscribe(user.id, data)
+    except CannotSubscribeToSelfError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.detail)
+    except TargetUserNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
