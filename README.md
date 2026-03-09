@@ -1,6 +1,6 @@
 # Blog Platform (Microservice Architecture)
 
-FastAPI + SQLAlchemy 2.0 (async) + PostgreSQL + Nginx API Gateway
+FastAPI + SQLAlchemy 2.0 (async) + PostgreSQL + Nginx API Gateway + Worker (Celery)
 
 ## Quick start
 
