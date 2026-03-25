@@ -1,5 +1,9 @@
 # Blog Platform (Microservice Architecture)
 
+Render URL: https://microservice-architecture-latest-oecc.onrender.com/
+
+Render swagger URL: https://microservice-architecture-latest-oecc.onrender.com/docs#/
+
 FastAPI + SQLAlchemy 2.0 (async) + PostgreSQL + Nginx API Gateway
 
 ## Quick start
